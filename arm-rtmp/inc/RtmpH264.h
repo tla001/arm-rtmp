@@ -46,7 +46,6 @@ typedef unsigned long long  QWORD, ULONG64, UINT64, ULONGLONG;
 
 class RtmpH264
 {
-
 public:
 	RtmpH264(void);
 

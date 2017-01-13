@@ -41,7 +41,8 @@ private:
 	int rate;
 	unsigned int tick;
 	unsigned int tick_gap;
-	uint32_t nowTime,lastTime;
+	uint32_t nowTime,lastTime ;
+	int sleepTime;
 	int frameIndex;
 
 };

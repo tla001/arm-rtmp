@@ -18,9 +18,9 @@ PushStream::PushStream(string url,int widths,int heigths,enum AVPixelFormat form
 	this->baseFrameSzie=width*height;
 	this->buffer=new char[baseFrameSzie*3];
 
-	this->fps=15;
-	this->rate=100;
-	this->outSize=512;
+	this->fps=25;
+	this->rate=200;
+	this->outSize=2048;
 	tick=0;
 	tick_gap=1000/this->fps;
 	nowTime=0;
@@ -41,6 +41,7 @@ void PushStream::closeDevice(){
 }
 void PushStream::worker(const CapFbTest &ct){
 	while(runflag){
+		lastTime=RTMP_GetTime();
 		if(frameIndex!=0){
 			timeval begintime,endtime;
 			gettimeofday(&begintime, NULL);
@@ -50,7 +51,7 @@ void PushStream::worker(const CapFbTest &ct){
 			timeuse /=1000;
 			printf("frame index %d time use %lf ms\n",frameIndex,timeuse);
 		}
-		lastTime=RTMP_GetTime();
+
 		switch(src_pix_fmt){
 			case AV_PIX_FMT_YUV420P:
 				//memcpy(buffer,ct.yuv420Frame,baseFrameSzie*3/2);
@@ -68,7 +69,10 @@ void PushStream::worker(const CapFbTest &ct){
 			}
 		tick +=tick_gap;
 		nowTime=RTMP_GetTime();
-		usleep((tick_gap-nowTime+lastTime)*1000);
+		sleepTime=tick_gap-nowTime+lastTime;
+		printf("tick_gap %d nowTime %d lastTime %d sleep time %d\n",tick_gap,nowTime,lastTime,sleepTime);
+		if(sleepTime>0)
+			usleep(sleepTime*1000);
 		frameIndex++;
 	}
 }
@@ -79,11 +83,11 @@ void PushStream::doPush(){
 	this->start();
 }
 void PushStream::dowork(char *buf){
+	lastTime=RTMP_GetTime();
 	if(frameIndex!=0){
 			RTMP_SendScreenCapture((char*)buffer,height,tick);
 			printf("send frame index -- %d\n",frameIndex);
 		}
-		lastTime=RTMP_GetTime();
 		switch(src_pix_fmt){
 			case AV_PIX_FMT_YUV420P:
 				memcpy(buffer,buf,baseFrameSzie*3/2);
@@ -100,6 +104,11 @@ void PushStream::dowork(char *buf){
 			}
 		tick +=tick_gap;
 		nowTime=RTMP_GetTime();
-		usleep((tick_gap-nowTime+lastTime)*1000);
+		sleepTime=tick_gap-nowTime+lastTime;
+		printf("tick_gap %d nowTime %d lastTime %d sleep time %d\n",tick_gap,nowTime,lastTime,sleepTime);
+		if(sleepTime>0){
+			usleep(sleepTime*1000);
+		}
+
 		frameIndex++;
 }

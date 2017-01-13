@@ -44,7 +44,7 @@ all: /home/tla001/arm-space/arm-rtmp
 /home/tla001/arm-space/arm-rtmp: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	arm-none-linux-gnueabi-g++ -L"/home/tla001/workspace/arm-rtmp/lib" -o "/home/tla001/arm-space/arm-rtmp" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-linux-gnueabi-g++ -L"/home/tla001/gitwork/arm-rtmp/arm-rtmp/lib" -o "/home/tla001/arm-space/arm-rtmp" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

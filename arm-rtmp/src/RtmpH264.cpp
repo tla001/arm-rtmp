@@ -2,7 +2,7 @@
 //
 
 #include "RtmpH264.h"
-
+#include <sys/time.h>
 
 char* audioConfig = NULL;
 long audioConfigLen = 0;
@@ -117,9 +117,9 @@ int RtmpH264::InitVideoParams(unsigned long width, unsigned long height, unsigne
 	x264_param_default_preset(&param, "veryfast", "zerolatency");
 
 	//* cpuFlags
-	param.i_threads = X264_SYNC_LOOKAHEAD_AUTO; /* 取空缓冲区继续使用不死锁的保证 */
+	param.i_threads = -1; /* 取空缓冲区继续使用不死锁的保证 */
 	param.i_sync_lookahead = X264_SYNC_LOOKAHEAD_AUTO;
-
+	/*X264_SYNC_LOOKAHEAD_AUTO*/
 	//* 视频选项
 	param.i_width = m_width;
 	param.i_height = m_height;
@@ -139,7 +139,7 @@ int RtmpH264::InitVideoParams(unsigned long width, unsigned long height, unsigne
 	param.i_bframe_pyramid = 0;
 	param.i_bframe_adaptive = X264_B_ADAPT_FAST;
 
-	//* 速率控制参数
+//	//* 速率控制参数
 	param.rc.i_lookahead = 0;
 	param.rc.i_bitrate = (int)m_bitRate; //* 码率(比特率,单位Kbps)
 
@@ -251,6 +251,9 @@ void RtmpH264::FreeEncodeParams()
 */
 int RtmpH264::SendScreenCapture(BYTE * frame,  unsigned long StrideHeight, unsigned long timespan)
 {
+	timeval begintime,endtime;
+	gettimeofday(&begintime, NULL);
+
 
 	//int nDataLen = Stride * StrideHeight;
 
@@ -280,12 +283,22 @@ int RtmpH264::SendScreenCapture(BYTE * frame,  unsigned long StrideHeight, unsig
 		break;
 	}
 	sws_scale(m_SwsContext,src_data,src_linesize,0,m_height, m_picInput.img.plane, m_picInput.img.i_stride);
+	gettimeofday(&endtime, NULL);
+	double timeuse = 1000000*(endtime.tv_sec - begintime.tv_sec)+endtime.tv_usec-begintime.tv_usec;
+	timeuse /=1000;
+	printf("copy time %lf\n",timeuse);
 
+	gettimeofday(&begintime, NULL);
 	i_nal = 0;
 	x264_encoder_encode(h, &nal_t, &i_nal, &m_picInput, &m_picOutput);
 	m_picInput.i_pts++;//少这句的话会出现 x264 [warning]: non-strictly-monotonic PTS
 
+	gettimeofday(&endtime, NULL);
+	 timeuse = 1000000*(endtime.tv_sec - begintime.tv_sec)+endtime.tv_usec-begintime.tv_usec;
+	timeuse /=1000;
+	printf("encode time %lf\n",timeuse);
 
+	gettimeofday(&begintime, NULL);
 	int rResult = 0;
 	for (int i = 0; i < i_nal; i++)
 	{
@@ -301,7 +314,10 @@ int RtmpH264::SendScreenCapture(BYTE * frame,  unsigned long StrideHeight, unsig
 			//LeaveCriticalSection(&m_Cs);
 		}
 	}
-
+	gettimeofday(&endtime, NULL);
+	 timeuse = 1000000*(endtime.tv_sec - begintime.tv_sec)+endtime.tv_usec-begintime.tv_usec;
+	timeuse /=1000;
+	printf("rtmp send time %lf\n",timeuse);
 	return rResult;
 }
 
@@ -386,11 +402,11 @@ long RTMP_SendScreenCapture(char * frame,  unsigned long Height, unsigned long t
 		throw(-1);
 	}
 
-	if (nResult != 1)
-	{
-		pRtmpH264->m_isCreatePublish = false;
-		RTMP_DeletePublish();
-	}
+//	if (nResult != 1)
+//	{
+//		pRtmpH264->m_isCreatePublish = false;
+//		RTMP_DeletePublish();
+//	}
 
 	return nResult;
 }

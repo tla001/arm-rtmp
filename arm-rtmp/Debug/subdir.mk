@@ -17,7 +17,7 @@ CPP_DEPS += \
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	arm-none-linux-gnueabi-g++ -I/usr/local/arm/librtmp -I"/home/tla001/workspace/arm-rtmp/inc" -I"/home/tla001/workspace/arm-rtmp/src" -I/usr/local/arm/openssl/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	arm-none-linux-gnueabi-g++ -I/usr/local/arm/librtmp -I"/home/tla001/gitwork/arm-rtmp/arm-rtmp/inc" -I"/home/tla001/gitwork/arm-rtmp/arm-rtmp/src" -I/usr/local/arm/openssl/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

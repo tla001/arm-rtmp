@@ -14,7 +14,7 @@ CapFbTest::CapFbTest() {
 	static char dev_ipu[]="/dev/mxc_ipu";
 	static char outfile[]="captest.avi";
 	static char outfile2[]="ccaptest.avi";
-	static std::string url="rtmp://219.216.87.99/live/test1";
+	static std::string url="rtmp://219.216.87.244/live/test1";
 
 	this->screen_w=640;
 	this->screen_h=480;
